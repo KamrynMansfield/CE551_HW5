@@ -6,7 +6,6 @@ format: html
 editor: visual
 callout-icon: false
 callout-appearance: simple
-output-fil
 ---
 
 ## Introduction
@@ -83,7 +82,7 @@ plot1 <- plot_ly(uqk_df,
 df <- uqk_df
 
 plot2 <- ggplot(df) +
-  geom_point(aes(x = `u (mph)`, y = `q (veh/hour)`),
+  geom_point(aes(x = `k (veh/mile)`, y = `q (veh/hour)`),
              color = "#1f77b4", 
              alpha = .7) +
   theme_light()
@@ -133,7 +132,7 @@ plot_ly(df_combined45,
 
 ```{r,echo=FALSE, message=FALSE, error=FALSE, warning=FALSE}
 ggplot(df_combined45) +
-  geom_point(aes(x = `u (mph)`, y = `q (veh/hour)`),
+  geom_point(aes(x = `k (veh/mile)`, y = `q (veh/hour)`),
              color = "#1f77b4", 
              alpha = .7) +
   theme_light()
@@ -182,7 +181,7 @@ plot_ly(df_combined51,
 
 ```{r,echo=FALSE, message=FALSE, error=FALSE, warning=FALSE}
 ggplot(df_combined51) +
-  geom_point(aes(x = `u (mph)`, y = `q (veh/hour)`),
+  geom_point(aes(x = `k (veh/mile)`, y = `q (veh/hour)`),
              color = "#1f77b4", 
              alpha = .7) +
   theme_light()
@@ -231,7 +230,7 @@ plot_ly(df_combined53,
 
 ```{r,echo=FALSE, message=FALSE, error=FALSE, warning=FALSE}
 ggplot(df_combined53) +
-  geom_point(aes(x = `u (mph)`, y = `q (veh/hour)`),
+  geom_point(aes(x = `k (veh/mile)`, y = `q (veh/hour)`),
              color = "#1f77b4", 
              alpha = .7) +
   theme_light()
@@ -276,7 +275,7 @@ plot_ly(df_combined_all,
 
 ```{r,echo=FALSE, message=FALSE, error=FALSE, warning=FALSE}
 ggplot(df_combined_all) +
-  geom_point(aes(x = `u (mph)`, y = `q (veh/hour)`, color = Station),
+  geom_point(aes(x = `k (veh/mile)`, y = `q (veh/hour)`, color = Station),
              alpha = .7) +
   theme_light()
 
@@ -293,7 +292,15 @@ ggplot(df_combined_all) +
 :::
 ::::
 
-<br>
+## Discussion
+
+The plots generally followed similar trends to the fundamental plots, but I was not as precise as I expected. I will comment on each plot type and describe the differences.
+
+-   **qu plot:** This plot follows the fundamental plot more closely at lower speeds. As speeds increase, it follows it less and less closely.
+
+-   **ku plot:** This plot seemed to be more precise as density increase. It had a bigger curve to it than the fundamental plot depicts.
+
+-   **kq plot:** This plot gets less precise as density increases. After about 200 vehicles per mile, the data points just fall apart and don't seem to follow a trend.
 
 ## Calculations
 
