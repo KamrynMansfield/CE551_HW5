@@ -1,0 +1,394 @@
+---
+title: "HW5: Reaction Time"
+author: "Kamryn Mansfield"
+date: "September 3, 2025"
+format: html
+editor: visual
+callout-icon: false
+callout-appearance: simple
+---
+
+## Introduction
+
+We were given highway data from 3 stations along I-40 in Knoxville. Each file contained five days of speed, count, and occupancy data gathered every 30 seconds for each lane of that segment of I-40.
+
+I needed to calculate the total speed (u), density (k), and flow (q) for each 30 seconds of data. Below I have listed how I calculated each.
+
+-   **Speed (u):** I used vehicle count and speed to get the harmonic mean of speed (or space mean speed).
+
+-   **Flow (q):** Vehicle count divided by 30 seconds and converted into vehicles per hour.
+
+-   **Density (k):** Flow divided by Speed.
+
+After calculating u, q, and k, I combined the five days of each station to get one data frame per station. I also combined all of the data across each section to plot it as well. Click the buttons in the results section to see the plots I produced for each of the four data frames.
+
+```{r, echo=FALSE, message=FALSE, error=FALSE,warning=FALSE}
+
+library(tidyverse)
+library(readxl)
+library(plotly)
+
+data_files <- list.files("CE551 2025 HW5 Data", full.names = TRUE)
+
+file <- data_files[[2]]
+
+sheet_num <- 5
+
+create_uqk_df <- function(file, sheet_num){
+  df <- read_excel(file, sheet = sheet_num)
+  
+  num_lanes <- (length(names(df)) - 5)/3
+  
+  tot_veh <- df |> 
+    select(grep("count",names(df))) |>
+    rowSums()
+  
+  for (lane in 1:num_lanes){
+    count <- df[[paste0("count_",lane)]]
+    speed <- df[[paste0("speed_",lane)]]
+    reciprocal <- ifelse(count > 0, count / speed, 0)
+    
+    #add the column
+    df[[paste0("reciprocal_",lane)]] <- reciprocal
+  }
+  
+  tot_reciprocals <- df |>
+    select(grep("reciprocal",names(df))) |>
+    rowSums()
+  
+  u <- tot_veh / tot_reciprocals
+  q <- tot_veh * 3600 / 30
+  k <- q / u
+  
+  new_df <- data.frame(u = u,
+                       q = q,
+                       k = k)
+  
+  names(new_df) <- c("u (mph)", "q (veh/hour)","k (veh/mile)")
+  
+  return(new_df)
+}
+
+uqk_df <- create_uqk_df(data_files[[2]], 3)
+
+plot1 <- plot_ly(uqk_df, 
+        x = ~`k (veh/mile)`,
+        y = ~`q (veh/hour)`, 
+        z = ~`u (mph)`, 
+        type = "scatter3d", 
+        mode = "markers", 
+        size = 1)
+
+df <- uqk_df
+
+plot2 <- ggplot(df) +
+  geom_point(aes(x = `u (mph)`, y = `q (veh/hour)`),
+             color = "#1f77b4", 
+             alpha = .7) +
+  theme_light()
+
+plot3 <- ggplot(df) +
+  geom_point(aes(x = `k (veh/mile)`, y = `u (mph)`),
+             color = "#1f77b4", 
+             alpha = .7) +
+  theme_light()
+
+plot4 <- ggplot(df) +
+  geom_point(aes(x = `q (veh/hour)`, y = `u (mph)`),
+             color = "#1f77b4", 
+             alpha = .7) +
+  theme_light()
+
+```
+
+## Results
+
+:::: {.callout-note collapse="true"}
+## Station 45
+
+```{r,echo=FALSE, message=FALSE, error=FALSE, warning=FALSE}
+
+file <- data_files[grep("45.xl",data_files)]
+
+list_of_dfs <- list()
+for (i in 1:5){
+  df <- create_uqk_df(file, sheet_num = i)
+  list_of_dfs[[i]] <- df
+}
+
+df_combined45 <- bind_rows(list_of_dfs)
+
+plot_ly(df_combined45, 
+        x = ~`k (veh/mile)`,
+        y = ~`q (veh/hour)`, 
+        z = ~`u (mph)`, 
+        type = "scatter3d", 
+        mode = "markers", 
+        size = 1)
+```
+
+::: {.callout-note collapse="true"}
+## 2D Plots
+
+```{r,echo=FALSE, message=FALSE, error=FALSE, warning=FALSE}
+ggplot(df_combined45) +
+  geom_point(aes(x = `u (mph)`, y = `q (veh/hour)`),
+             color = "#1f77b4", 
+             alpha = .7) +
+  theme_light()
+
+ggplot(df_combined45) +
+  geom_point(aes(x = `k (veh/mile)`, y = `u (mph)`),
+             color = "#1f77b4", 
+             alpha = .7) +
+  theme_light()
+
+ggplot(df_combined45) +
+  geom_point(aes(x = `q (veh/hour)`, y = `u (mph)`),
+             color = "#1f77b4", 
+             alpha = .7) +
+  theme_light()
+```
+:::
+::::
+
+:::: {.callout-note collapse="true"}
+## Station 51
+
+```{r,echo=FALSE, message=FALSE, error=FALSE, warning=FALSE}
+
+file <- data_files[grep("51.xl",data_files)]
+
+list_of_dfs <- list()
+for (i in 1:5){
+  df <- create_uqk_df(file, sheet_num = i)
+  list_of_dfs[[i]] <- df
+}
+
+df_combined51 <- bind_rows(list_of_dfs)
+
+plot_ly(df_combined51, 
+        x = ~`k (veh/mile)`,
+        y = ~`q (veh/hour)`, 
+        z = ~`u (mph)`, 
+        type = "scatter3d", 
+        mode = "markers", 
+        size = 1)
+```
+
+::: {.callout-note collapse="true"}
+## 2D Plots
+
+```{r,echo=FALSE, message=FALSE, error=FALSE, warning=FALSE}
+ggplot(df_combined51) +
+  geom_point(aes(x = `u (mph)`, y = `q (veh/hour)`),
+             color = "#1f77b4", 
+             alpha = .7) +
+  theme_light()
+
+ggplot(df_combined51) +
+  geom_point(aes(x = `k (veh/mile)`, y = `u (mph)`),
+             color = "#1f77b4", 
+             alpha = .7) +
+  theme_light()
+
+ggplot(df_combined51) +
+  geom_point(aes(x = `q (veh/hour)`, y = `u (mph)`),
+             color = "#1f77b4", 
+             alpha = .7) +
+  theme_light()
+```
+:::
+::::
+
+:::: {.callout-note collapse="true"}
+## Station 53
+
+```{r,echo=FALSE, message=FALSE, error=FALSE, warning=FALSE}
+
+file <- data_files[grep("53.xl",data_files)]
+
+list_of_dfs <- list()
+for (i in 1:5){
+  df <- create_uqk_df(file, sheet_num = i)
+  list_of_dfs[[i]] <- df
+}
+
+df_combined53 <- bind_rows(list_of_dfs)
+
+plot_ly(df_combined53, 
+        x = ~`k (veh/mile)`,
+        y = ~`q (veh/hour)`, 
+        z = ~`u (mph)`, 
+        type = "scatter3d", 
+        mode = "markers", 
+        size = 1)
+```
+
+::: {.callout-note collapse="true"}
+## 2D Plots
+
+```{r,echo=FALSE, message=FALSE, error=FALSE, warning=FALSE}
+ggplot(df_combined53) +
+  geom_point(aes(x = `u (mph)`, y = `q (veh/hour)`),
+             color = "#1f77b4", 
+             alpha = .7) +
+  theme_light()
+
+ggplot(df_combined53) +
+  geom_point(aes(x = `k (veh/mile)`, y = `u (mph)`),
+             color = "#1f77b4", 
+             alpha = .7) +
+  theme_light()
+
+ggplot(df_combined53) +
+  geom_point(aes(x = `q (veh/hour)`, y = `u (mph)`),
+             color = "#1f77b4", 
+             alpha = .7) +
+  theme_light()
+```
+:::
+::::
+
+:::: {.callout-tip collapse="true"}
+## All Combined
+
+```{r,echo=FALSE, message=FALSE, error=FALSE, warning=FALSE}
+
+df_combined45$Station <- "45"
+df_combined51$Station <- "51"
+df_combined53$Station <- "53"
+
+df_combined_all <- bind_rows(df_combined45,df_combined51,df_combined53)
+
+plot_ly(df_combined_all, 
+        x = ~`k (veh/mile)`,
+        y = ~`q (veh/hour)`, 
+        z = ~`u (mph)`, 
+        type = "scatter3d", 
+        mode = "markers", 
+        size = 1)
+```
+
+::: {.callout-tip collapse="true"}
+## 2D Plots
+
+```{r,echo=FALSE, message=FALSE, error=FALSE, warning=FALSE}
+ggplot(df_combined_all) +
+  geom_point(aes(x = `u (mph)`, y = `q (veh/hour)`, color = Station),
+             alpha = .7) +
+  theme_light()
+
+ggplot(df_combined_all) +
+  geom_point(aes(x = `k (veh/mile)`, y = `u (mph)`, color = Station),
+             alpha = .7) +
+  theme_light()
+
+ggplot(df_combined_all) +
+  geom_point(aes(x = `q (veh/hour)`, y = `u (mph)`, color = Station),
+             alpha = .7) +
+  theme_light()
+```
+:::
+::::
+
+<br>
+
+## Calculations
+
+Click below to expand and see my r code for this assignment
+
+::: {.callout-warning collapse="true"}
+## R code
+
+```{r, message=FALSE, error=FALSE,warning=FALSE}
+
+library(tidyverse)
+library(readxl)
+library(plotly)
+
+data_files <- list.files("CE551 2025 HW5 Data", full.names = TRUE)
+
+file <- data_files[[2]]
+
+sheet_num <- 5
+
+#### Creating a function to create the u q k data frame ####
+create_uqk_df <- function(file, sheet_num){
+  df <- read_excel(file, sheet = sheet_num)
+  
+  num_lanes <- (length(names(df)) - 5)/3
+  
+  tot_veh <- df |> 
+    select(grep("count",names(df))) |>
+    rowSums()
+  
+  for (lane in 1:num_lanes){
+    count <- df[[paste0("count_",lane)]]
+    speed <- df[[paste0("speed_",lane)]]
+    reciprocal <- ifelse(count > 0, count / speed, 0)
+    
+    #add the column
+    df[[paste0("reciprocal_",lane)]] <- reciprocal
+  }
+  
+  tot_reciprocals <- df |>
+    select(grep("reciprocal",names(df))) |>
+    rowSums()
+  
+  u <- tot_veh / tot_reciprocals
+  q <- tot_veh * 3600 / 30
+  k <- q / u
+  
+  new_df <- data.frame(u = u,
+                       q = q,
+                       k = k)
+  
+  names(new_df) <- c("u (mph)", "q (veh/hour)","k (veh/mile)")
+  
+  return(new_df)
+}
+
+
+#### Looping through each sheet to combine the days of each station ####
+file <- data_files[grep("53.xl",data_files)]
+
+list_of_dfs <- list()
+for (i in 1:5){
+  df <- create_uqk_df(file, sheet_num = i)
+  list_of_dfs[[i]] <- df
+}
+
+df <- bind_rows(list_of_dfs)
+
+
+#### plotting in 3D ####
+plot_3d <- plot_ly(df, 
+        x = ~`k (veh/mile)`,
+        y = ~`q (veh/hour)`, 
+        z = ~`u (mph)`, 
+        type = "scatter3d", 
+        mode = "markers", 
+        size = 1)
+
+#### plotting in 2D ####
+plot_u_q <- ggplot(df) +
+  geom_point(aes(x = `u (mph)`, y = `q (veh/hour)`),
+             color = "#1f77b4", 
+             alpha = .7) +
+  theme_light()
+
+plot_k_q <- ggplot(df) +
+  geom_point(aes(x = `k (veh/mile)`, y = `u (mph)`),
+             color = "#1f77b4", 
+             alpha = .7) +
+  theme_light()
+
+plot_q_u <- ggplot(df) +
+  geom_point(aes(x = `q (veh/hour)`, y = `u (mph)`),
+             color = "#1f77b4", 
+             alpha = .7) +
+  theme_light()
+
+```
+:::
